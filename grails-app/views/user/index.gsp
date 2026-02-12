@@ -19,7 +19,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="layout" content="main"/>
+  <meta name="layouts" content="main"/>
   <title>Users Management</title>
   <asset:stylesheet src="bootstrap.css"/>
   <asset:stylesheet src="dataTables.bootstrap5.css"/>

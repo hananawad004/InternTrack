@@ -301,6 +301,105 @@
 //        return 'U'
 //    }
 //}
+//package interntrack
+//
+//import grails.plugin.springsecurity.SpringSecurityService
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+//import groovy.transform.EqualsAndHashCode
+//import groovy.transform.ToString
+//
+//@EqualsAndHashCode(includes='username')
+//@ToString(includes='username', includeNames=true, includePackage=false)
+//class User implements Serializable {
+//
+//    private static final long serialVersionUID = 1
+//
+//    transient springSecurityService
+//
+//    String username
+//    String password
+//    String email
+//    String fullName
+//    String phone
+//    String profileImage
+//    String role
+//    boolean enabled = true
+//    boolean accountExpired = false
+//    boolean accountLocked = false
+//    boolean passwordExpired = false
+//
+//    Date dateCreated
+//    Date lastUpdated
+//
+//    static transients = ['springSecurityService']
+//
+//    static constraints = {
+//        username blank: false, unique: true, email: true
+//        password blank: false, password: true
+//        email blank: false, email: true, unique: true
+//        fullName blank: false
+//        phone nullable: true, matches: /[0-9+\-\s()]+/
+//        profileImage nullable: true
+//    }
+//
+//    static mapping = {
+//        password column: '`password`'
+//        table '`user`'
+//    }
+//
+////    Set<Role> getAuthorities() {
+////        (UserRole.findAllByUser(this)*.role as Set) ?: [] as Set
+////    }
+//    Set<String> getAuthorities() {
+//        if (this.role) {
+//            return [this.role] as Set
+//        }
+//        return [] as Set
+//    }
+//    def beforeInsert() {
+//        encodePassword()
+//        dateCreated = new Date()
+//        lastUpdated = new Date()
+//    }
+//
+//    def beforeUpdate() {
+//        if (isDirty('password')) {
+//            encodePassword()
+//        }
+//        lastUpdated = new Date()
+//    }
+//
+//    protected void encodePassword() {
+//        if (password && !password.startsWith('$2a$')) {
+//            println "Encoding password for user: ${username}"
+//            try {
+//                if (springSecurityService?.passwordEncoder) {
+//                    password = springSecurityService.encodePassword(password)
+//                } else {
+//                    def encoder = new BCryptPasswordEncoder()
+//                    password = encoder.encode(password)
+//                }
+//                println "Password encoded successfully"
+//            } catch (Exception e) {
+//                println "Error encoding password: ${e.message}"
+//                def encoder = new BCryptPasswordEncoder()
+//                password = encoder.encode(password)
+//            }
+//        }
+//    }
+//
+//    String getInitials() {
+//        if (fullName) {
+//            def parts = fullName.split(' ').findAll { it }
+//            if (parts.size() >= 2) {
+//                return "${parts[0][0]}${parts[-1][0]}".toUpperCase()
+//            } else if (parts.size() == 1) {
+//                return parts[0][0].toUpperCase()
+//            }
+//        }
+//        return 'U'
+//    }
+//}
 package interntrack
 
 import grails.plugin.springsecurity.SpringSecurityService
@@ -330,24 +429,27 @@ class User implements Serializable {
     Date dateCreated
     Date lastUpdated
 
-    static transients = ['springSecurityService']
+    static hasOne = [intern: Intern, supervisor: Supervisor]
 
     static constraints = {
         username blank: false, unique: true, email: true
         password blank: false, password: true
-        email blank: false, email: true, unique: true
+        email blank: false, unique: true
         fullName blank: false
-        phone nullable: true, matches: /[0-9+\-\s()]+/
+        phone nullable: true
         profileImage nullable: true
+        intern nullable: true
+        supervisor nullable: true
     }
 
     static mapping = {
         password column: '`password`'
         table '`user`'
+        cache true
     }
 
     Set<Role> getAuthorities() {
-        (UserRole.findAllByUser(this)*.role as Set) ?: [] as Set
+        UserRole.findAllByUser(this)*.role as Set
     }
 
     def beforeInsert() {
@@ -365,7 +467,6 @@ class User implements Serializable {
 
     protected void encodePassword() {
         if (password && !password.startsWith('$2a$')) {
-            println "Encoding password for user: ${username}"
             try {
                 if (springSecurityService?.passwordEncoder) {
                     password = springSecurityService.encodePassword(password)
@@ -373,7 +474,6 @@ class User implements Serializable {
                     def encoder = new BCryptPasswordEncoder()
                     password = encoder.encode(password)
                 }
-                println "Password encoded successfully"
             } catch (Exception e) {
                 println "Error encoding password: ${e.message}"
                 def encoder = new BCryptPasswordEncoder()
@@ -384,7 +484,7 @@ class User implements Serializable {
 
     String getInitials() {
         if (fullName) {
-            def parts = fullName.split(' ').findAll { it }
+            def parts = fullName.trim().split(' ')
             if (parts.size() >= 2) {
                 return "${parts[0][0]}${parts[-1][0]}".toUpperCase()
             } else if (parts.size() == 1) {

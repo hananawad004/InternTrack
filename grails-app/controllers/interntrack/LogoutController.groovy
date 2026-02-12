@@ -75,17 +75,6 @@
 //        redirect controller: 'login', action: 'auth'
 //    }
 //}
-//package interntrack
-//
-//import grails.plugin.springsecurity.annotation.Secured
-//
-//class LogoutController {
-//
-//    def index() {
-//        // Spring Security سيتولى تسجيل الخروج
-//        redirect uri: '/'
-//    }
-//}
 package interntrack
 
 import grails.plugin.springsecurity.annotation.Secured
@@ -93,14 +82,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class LogoutController {
 
     def index() {
-        // Spring Security سيتولى تسجيل الخروج تلقائياً
-        // سنقوم بتوجيه المستخدم إلى صفحة تسجيل الدخول
-        println "Logging out user"
-
-        // إعادة تعيين الجلسة
-        session.invalidate()
-
-        // التوجيه إلى صفحة تسجيل الدخول
-        redirect controller: 'login', action: 'auth'
+        // Spring Security سيتولى تسجيل الخروج
+        redirect uri: '/'
     }
 }

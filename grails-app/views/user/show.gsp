@@ -19,7 +19,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="layout" content="main"/>
+  <meta name="layouts" content="main"/>
   <title>User Details - ${user.username}</title>
   <asset:stylesheet src="bootstrap.css"/>
 </head>

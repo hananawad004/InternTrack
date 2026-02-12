@@ -130,6 +130,7 @@
 //    }
 //}
 // File: grails-app/domain/interntrack/Intern.groovy
+// File: grails-app/domain/interntrack/Intern.groovy
 package interntrack
 
 class Intern {
@@ -165,7 +166,6 @@ class Intern {
         emergencyContact nullable: true
         emergencyPhone nullable: true, matches: /[0-9+\-\s()]+/
         user unique: true
-        // ✅ تم إزالة dateCreated و lastUpdated
     }
 
     static mapping = {
@@ -173,7 +173,6 @@ class Intern {
         weeklyReports cascade: 'all-delete-orphan'
         evaluations cascade: 'all-delete-orphan'
         sort startDate: 'desc'
-        // ✅ تم إزالة autoTimestamp
     }
 
     String toString() {
@@ -182,7 +181,30 @@ class Intern {
 
     Integer getRemainingDays() {
         if (endDate && status == 'ACTIVE') {
-            return (endDate - new Date()).intValue()
+            try {
+                Calendar calEnd = Calendar.getInstance()
+                calEnd.setTime(endDate)
+
+                Calendar calNow = Calendar.getInstance()
+                calNow.setTime(new Date())
+
+                calEnd.set(Calendar.HOUR_OF_DAY, 0)
+                calEnd.set(Calendar.MINUTE, 0)
+                calEnd.set(Calendar.SECOND, 0)
+                calEnd.set(Calendar.MILLISECOND, 0)
+
+                calNow.set(Calendar.HOUR_OF_DAY, 0)
+                calNow.set(Calendar.MINUTE, 0)
+                calNow.set(Calendar.SECOND, 0)
+                calNow.set(Calendar.MILLISECOND, 0)
+
+                // حساب الفرق بالأيام
+                long diffInMillis = calEnd.getTimeInMillis() - calNow.getTimeInMillis()
+                return (diffInMillis / (1000 * 60 * 60 * 24)).intValue()
+            } catch (Exception e) {
+                log.error "Error calculating remaining days: ${e.message}"
+                return 0
+            }
         }
         return 0
     }

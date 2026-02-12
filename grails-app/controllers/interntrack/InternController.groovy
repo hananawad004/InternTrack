@@ -1,52 +1,37 @@
-// File: grails-app/controllers/intern/track/InternController.groovy
+// File: grails-app/controllers/interntrack/InternController.groovy
 package interntrack
-import interntrack.TaskService
-import interntrack.ReportService
-import interntrack.EvaluationService
 
+import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.converters.JSON
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
+//@Secured(['ROLE_SUPERVISOR', 'ROLE_ADMIN'])
+@Transactional
 class InternController {
 
     SpringSecurityService springSecurityService
-    TaskService taskService
-    ReportService reportService
-    EvaluationService evaluationService
 
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-
+    // ============== Index / List ==============
     def index() {
         def currentUser = springSecurityService.currentUser
-        def role = getCurrentUserRole()
+        def role = currentUser.authorities*.authority[0]
 
         def internList = []
 
-        switch(role) {
-            case 'ROLE_SUPERVISOR':
-                def supervisor = Supervisor.findByUser(currentUser)
-                if (supervisor) {
-                    internList = Intern.findAllBySupervisor(supervisor, [sort: 'startDate', order: 'desc'])
-                }
-                break
-            case 'ROLE_ADMIN':
-                internList = Intern.list([sort: 'startDate', order: 'desc'])
-                break
-            default:
-                flash.error = "Access denied"
-                redirect(controller: 'dashboard', action: 'index')
-                return
+        if (role == 'ROLE_ADMIN') {
+            internList = Intern.list(sort: 'startDate', order: 'desc')
+        } else if (role == 'ROLE_SUPERVISOR') {
+            def supervisor = Supervisor.findByUser(currentUser)
+            internList = Intern.findAllBySupervisor(supervisor, [sort: 'startDate', order: 'desc'])
         }
 
-        render(view: 'index', model: [
-                internList: internList,
-                statusList: ['ACTIVE', 'COMPLETED', 'TERMINATED']
-        ])
+        [internList: internList, internCount: internList.size()]
     }
 
+    // ============== Show ==============
     def show(Long id) {
         def intern = Intern.get(id)
-
         if (!intern) {
             flash.error = "Intern not found"
             redirect(action: 'index')
@@ -59,76 +44,117 @@ class InternController {
             return
         }
 
-        def taskStats = taskService.getTaskStatistics(intern)
-        def reportStats = reportService.getReportStatistics(intern)
-        def evalStats = evaluationService.getEvaluationStatistics(intern)
-        def recentTasks = Task.findAllByIntern(intern, [max: 5, sort: 'dueDate', order: 'asc'])
-        def recentReports = WeeklyReport.findAllByIntern(intern, [max: 5, sort: 'reportDate', order: 'desc'])
-        def evaluations = Evaluation.findAllByIntern(intern, [max: 5, sort: 'evaluationDate', order: 'desc'])
-
-        render(view: 'show', model: [
-                intern: intern,
-                taskStats: taskStats,
-                reportStats: reportStats,
-                evalStats: evalStats,
-                recentTasks: recentTasks,
-                recentReports: recentReports,
-                evaluations: evaluations,
-                performanceReport: evaluationService.generatePerformanceReport(intern)
-        ])
+        [intern: intern]
     }
 
+    // ============== Create ==============
     def create() {
-        def currentUser = springSecurityService.currentUser
-        def role = getCurrentUserRole()
+        render(view: 'create', model: getCreateModel())
+    }
 
-        if (role != 'ROLE_ADMIN') {
-            flash.error = "Access denied"
-            redirect(action: 'index')
+    // ============== Save ==============
+    @Transactional
+    def save() {
+        def intern = new Intern()
+
+        // Bind data from form
+        bindData(intern, params, [
+                include: [
+                        'studentId', 'university', 'major', 'department',
+                        'yearOfStudy', 'startDate', 'endDate', 'status',
+                        'notes', 'emergencyContact', 'emergencyPhone'
+                ]
+        ])
+
+        // ✅ إنشاء User جديد - استخدم إيميل حقيقي
+        def encoder = new BCryptPasswordEncoder()
+
+        // استخدام نطاق إيميل حقيقي
+        String baseUsername = params.studentId + "@student.university.edu"
+        String username = baseUsername
+        int counter = 1
+
+        while (User.findByUsername(username)) {
+            username = params.studentId + "+" + counter++ + "@student.university.edu"
+        }
+
+        String fullName = params.fullName ?: "Intern " + params.studentId
+
+        def user = new User(
+                username: username,
+                password: encoder.encode('intern123'),
+                email: username,  // نفس الإيميل
+                fullName: fullName,
+                enabled: true
+        )
+
+        // ✅ حفظ User
+        if (!user.save(flush: true)) {
+            def errors = user.errors.allErrors.collect {
+                def field = it.arguments?.find { arg -> arg instanceof org.springframework.validation.FieldError }?.field
+                field ? "${field}: ${it.defaultMessage}" : it.defaultMessage
+            }.join(', ')
+
+            flash.error = "❌ Could not create user account: ${errors ?: 'Unknown error'}"
+            render(view: 'create', model: getCreateModel())
             return
         }
 
-        def users = User.list()
-        def supervisors = Supervisor.list()
+        // Assign ROLE_INTERN
+        def role = Role.findByAuthority('ROLE_INTERN')
+        if (role && !UserRole.exists(user.id, role.id)) {
+            new UserRole(user: user, role: role).save(flush: true)
+        }
 
-        render(view: 'create', model: [
-                intern: new Intern(),
-                users: users,
-                supervisors: supervisors,
-                statusList: ['ACTIVE', 'COMPLETED', 'TERMINATED'],
-                yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
-        ])
-    }
+        intern.user = user
+        flash.message = "✅ User account created: ${username} / intern123"
 
-    def save() {
-        try {
-            def currentUser = springSecurityService.currentUser
-            def role = getCurrentUserRole()
+        // ✅ باقي الكود...
+        // تعيين المشرف، التحقق من Student ID، إلخ
 
-            if (role != 'ROLE_ADMIN') {
-                flash.error = "Access denied"
-                redirect(action: 'index')
-                return
-            }
+        // ✅ تعيين المشرف
+        if (!params.supervisorId) {
+            flash.error = "❌ Please select a supervisor"
+            render(view: 'create', model: getCreateModel())
+            return
+        }
 
-            def intern = new Intern(params)
+        def supervisor = Supervisor.get(params.supervisorId)
+        if (!supervisor) {
+            flash.error = "❌ Supervisor not found"
+            render(view: 'create', model: getCreateModel())
+            return
+        }
+        intern.supervisor = supervisor
 
-            if (!intern.save(flush: true)) {
-                throw new RuntimeException("Failed to save intern: ${intern.errors}")
-            }
+        // ✅ التأكد من Student ID فريد
+        def existingIntern = Intern.findByStudentId(intern.studentId)
+        if (existingIntern) {
+            intern.studentId = intern.studentId + "-" + System.currentTimeMillis().toString().takeRight(3)
+            flash.warning = "⚠️ Student ID was changed to: ${intern.studentId}"
+        }
 
-            flash.message = "Intern created successfully"
+        // ✅ القيم الافتراضية
+        intern.totalHours = 0.0G
+        intern.status = intern.status ?: 'ACTIVE'
+
+        // ✅ حفظ Intern
+        if (intern.save(flush: true)) {
+            flash.message = "✅ Intern created successfully. ${flash.message}"
             redirect(action: 'show', id: intern.id)
+        } else {
+            def errors = intern.errors.allErrors.collect {
+                def field = it.arguments?.find { arg -> arg instanceof org.springframework.validation.FieldError }?.field
+                field ? "${field}: ${it.defaultMessage}" : it.defaultMessage
+            }.join(', ')
 
-        } catch (Exception e) {
-            flash.error = "Error creating intern: ${e.message}"
-            redirect(action: 'create')
+            flash.error = "❌ Error creating intern: ${errors}"
+            render(view: 'create', model: getCreateModel())
         }
     }
-
+//   ===== Edit ==============
     def edit(Long id) {
         def intern = Intern.get(id)
-
         if (!intern) {
             flash.error = "Intern not found"
             redirect(action: 'index')
@@ -137,66 +163,83 @@ class InternController {
 
         if (!hasAccessToIntern(intern)) {
             flash.error = "Access denied"
-            redirect(action: 'index')
-            return
-        }
-
-        def users = User.list()
-        def supervisors = Supervisor.list()
-
-        render(view: 'edit', model: [
-                intern: intern,
-                users: users,
-                supervisors: supervisors,
-                statusList: ['ACTIVE', 'COMPLETED', 'TERMINATED'],
-                yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
-        ])
-    }
-
-    def update(Long id) {
-        def intern = Intern.get(id)
-
-        if (!intern) {
-            flash.error = "Intern not found"
-            redirect(action: 'index')
-            return
-        }
-
-        if (!hasAccessToIntern(intern)) {
-            flash.error = "Access denied"
-            redirect(action: 'index')
-            return
-        }
-
-        try {
-            intern.properties = params
-
-            if (!intern.save(flush: true)) {
-                throw new RuntimeException("Failed to update intern: ${intern.errors}")
-            }
-
-            flash.message = "Intern updated successfully"
-            redirect(action: 'show', id: intern.id)
-
-        } catch (Exception e) {
-            flash.error = "Error updating intern: ${e.message}"
-            redirect(action: 'edit', id: id)
-        }
-    }
-
-    def delete(Long id) {
-        def intern = Intern.get(id)
-
-        if (!intern) {
-            flash.error = "Intern not found"
             redirect(action: 'index')
             return
         }
 
         def currentUser = springSecurityService.currentUser
-        def role = getCurrentUserRole()
+        def role = currentUser.authorities*.authority[0]
+        def supervisors = []
 
-        if (role != 'ROLE_ADMIN') {
+        if (role == 'ROLE_ADMIN') {
+            supervisors = Supervisor.list()
+        } else if (role == 'ROLE_SUPERVISOR') {
+            def supervisor = Supervisor.findByUser(currentUser)
+            supervisors = [supervisor]
+        }
+
+        [
+                intern: intern,
+                supervisors: supervisors,
+                yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
+        ]
+    }
+
+    // ============== Update ==============
+    @Transactional
+    def update(Long id) {
+        def intern = Intern.get(id)
+        if (!intern) {
+            flash.error = "Intern not found"
+            redirect(action: 'index')
+            return
+        }
+
+        if (!hasAccessToIntern(intern)) {
+            flash.error = "Access denied"
+            redirect(action: 'index')
+            return
+        }
+
+        bindData(intern, params, [
+                include: [
+                        'studentId', 'university', 'major', 'department',
+                        'yearOfStudy', 'startDate', 'endDate', 'status',
+                        'notes', 'emergencyContact', 'emergencyPhone', 'totalHours'
+                ]
+        ])
+
+        if (params.supervisorId) {
+            def supervisor = Supervisor.get(params.supervisorId)
+            if (supervisor) {
+                intern.supervisor = supervisor
+            }
+        }
+
+        if (intern.save(flush: true)) {
+            flash.message = "✅ Intern updated successfully"
+            redirect(action: 'show', id: intern.id)
+        } else {
+            flash.error = "❌ Error updating intern"
+            render(view: 'edit', model: [
+                    intern: intern,
+                    supervisors: Supervisor.list(),
+                    yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
+            ])
+        }
+    }
+
+    // ============== Delete ==============
+    @Transactional
+    def delete(Long id) {
+        def intern = Intern.get(id)
+        if (!intern) {
+            flash.error = "Intern not found"
+            redirect(action: 'index')
+            return
+        }
+
+        if (!hasAccessToIntern(intern)) {
             flash.error = "Access denied"
             redirect(action: 'index')
             return
@@ -204,128 +247,49 @@ class InternController {
 
         try {
             intern.delete(flush: true)
-            flash.message = "Intern deleted successfully"
-
+            flash.message = "✅ Intern deleted successfully"
         } catch (Exception e) {
-            flash.error = "Error deleting intern: ${e.message}"
+            flash.error = "❌ Error deleting intern: ${e.message}"
         }
 
         redirect(action: 'index')
     }
 
-    def assignSupervisor() {
-        try {
-            def intern = Intern.get(params.internId)
-            def supervisor = Supervisor.get(params.supervisorId)
-
-            if (!intern || !supervisor) {
-                render([success: false, message: 'Intern or Supervisor not found'] as JSON)
-                return
-            }
-
-            if (!hasAccessToIntern(intern)) {
-                render([success: false, message: 'Access denied'] as JSON)
-                return
-            }
-
-            intern.supervisor = supervisor
-
-            if (!intern.save(flush: true)) {
-                render([success: false, message: 'Failed to assign supervisor'] as JSON)
-                return
-            }
-
-            render([success: true, intern: intern] as JSON)
-
-        } catch (Exception e) {
-            render([success: false, message: e.message] as JSON)
-        }
-    }
-
-    def updateStatus() {
-        try {
-            def intern = Intern.get(params.id)
-
-            if (!intern) {
-                render([success: false, message: 'Intern not found'] as JSON)
-                return
-            }
-
-            if (!hasAccessToIntern(intern)) {
-                render([success: false, message: 'Access denied'] as JSON)
-                return
-            }
-
-            intern.status = params.status
-
-            if (!intern.save(flush: true)) {
-                render([success: false, message: 'Failed to update status'] as JSON)
-                return
-            }
-
-            render([success: true, intern: intern] as JSON)
-
-        } catch (Exception e) {
-            render([success: false, message: e.message] as JSON)
-        }
-    }
-
-    // API endpoints
-    def apiInterns() {
+    // ============== Helper Methods ==============
+    private def getCreateModel() {
         def currentUser = springSecurityService.currentUser
-        def role = getCurrentUserRole()
+        def role = currentUser.authorities*.authority[0]
+        def supervisors = []
 
-        def interns = []
-
-        switch(role) {
-            case 'ROLE_SUPERVISOR':
-                def supervisor = Supervisor.findByUser(currentUser)
-                if (supervisor) {
-                    interns = Intern.findAllBySupervisor(supervisor)
-                }
-                break
-            case 'ROLE_ADMIN':
-                interns = Intern.list(params)
-                break
+        if (role == 'ROLE_ADMIN') {
+            supervisors = Supervisor.list()
+        } else if (role == 'ROLE_SUPERVISOR') {
+            def supervisor = Supervisor.findByUser(currentUser)
+            supervisors = [supervisor]
         }
 
-        render interns as JSON
-    }
+        Calendar cal = Calendar.getInstance()
+        cal.add(Calendar.DAY_OF_MONTH, 90)
+        Date defaultEndDate = cal.time
 
-    def apiPerformanceReport(Long id) {
-        def intern = Intern.get(id)
-
-        if (!intern) {
-            render([error: 'Intern not found'] as JSON)
-            return
-        }
-
-        if (!hasAccessToIntern(intern)) {
-            render([error: 'Access denied'] as JSON)
-            return
-        }
-
-        def report = evaluationService.generatePerformanceReport(intern)
-        render report as JSON
+        return [
+                intern: new Intern(),
+                supervisors: supervisors,
+                yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'],
+                defaultEndDate: defaultEndDate
+        ]
     }
 
     private boolean hasAccessToIntern(Intern intern) {
         def currentUser = springSecurityService.currentUser
-        def role = getCurrentUserRole()
+        def role = currentUser.authorities*.authority[0]
 
-        switch(role) {
-            case 'ROLE_ADMIN':
-                return true
-            case 'ROLE_SUPERVISOR':
-                def supervisor = Supervisor.findByUser(currentUser)
-                return intern.supervisor == supervisor
-            default:
-                return false
+        if (role == 'ROLE_ADMIN') {
+            return true
+        } else if (role == 'ROLE_SUPERVISOR') {
+            def supervisor = Supervisor.findByUser(currentUser)
+            return intern.supervisor == supervisor
         }
-    }
-
-    private String getCurrentUserRole() {
-        def authorities = springSecurityService.authentication.authorities
-        return authorities?.find()?.authority
+        return false
     }
 }

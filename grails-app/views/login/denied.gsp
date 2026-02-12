@@ -23,7 +23,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main"/>
+    <meta name="layouts" content="main"/>
     <title>Access Denied - InternTrack</title>
 
     <style>

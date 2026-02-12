@@ -1,4 +1,3 @@
-package interntrack
 //
 //class UrlMappings {
 //
@@ -236,25 +235,103 @@ package interntrack
 //        "404"(view: '/notFound')
 //    }
 //}
+// File: grails-app/controllers/interntrack/UrlMappings.groovy
+// File: grails-app/controllers/interntrack/UrlMappings.groovy
 
+
+//
+//package interntrack
+//
+//class UrlMappings {
+//
+//    static mappings = {
+//        "/$controller/$action?/$id?(.$format)?"{}
+//
+//        "/"(controller: "login", action: "auth")
+//        "/index"(controller: "login", action: "auth")
+//
+//        // ========== LOGIN ==========
+//        "/login/auth"(controller: "login", action: "auth")
+//        "/login/authenticate"(controller: "login", action: "authenticate")
+//        "/login/success"(controller: "login", action: "success")
+//        "/login/authfail"(controller: "login", action: "authfail")
+//        "/login/testAuth"(controller: "login", action: "testAuth")
+//        "/logout"(controller: "logout", action: "index")
+//
+//        // ========== DASHBOARD ==========
+//        "/dashboard/admin"(controller: "dashboard", action: "admin")
+//        "/dashboard/supervisor"(controller: "dashboard", action: "supervisor")
+//        "/dashboard/intern"(controller: "dashboard", action: "intern")
+//        "/dashboard/index"(controller: "dashboard", action: "index")
+//
+//        // ========== INTERN ==========
+//        "/intern"(controller: "intern", action: "index")
+//        "/intern/index"(controller: "intern", action: "index")
+//        "/intern/create"(controller: "intern", action: "create")
+//        "/intern/save"(controller: "intern", action: "save")
+//        "/intern/show/$id"(controller: "intern", action: "show")
+//        "/intern/edit/$id"(controller: "intern", action: "edit")
+//        "/intern/update/$id"(controller: "intern", action: "update")
+//        "/intern/delete/$id"(controller: "intern", action: "delete")
+//
+//        // ========== USER ==========
+//        "/user"(controller: "user", action: "index")
+//        "/user/index"(controller: "user", action: "index")
+//        "/user/create"(controller: "user", action: "create")
+//        "/user/save"(controller: "user", action: "save")
+//        "/user/show/$id"(controller: "user", action: "show")
+//        "/user/edit/$id"(controller: "user", action: "edit")
+//        "/user/update/$id"(controller: "user", action: "update")
+//        "/user/delete/$id"(controller: "user", action: "delete")
+//        "/test"(view: '/test')
+//        // ========== ERROR ==========
+//        "500"(view: '/error')
+//        "404"(view: '/notFound')
+//    }
+//}
+package interntrack
 
 class UrlMappings {
 
     static mappings = {
-        "/"(controller: "login", action: "auth")
+        "/$controller/$action?/$id?(.$format)?"{
+            constraints {
+                // apply constraints here
+            }
+        }
 
+//        "/"(controller: "login", action: "auth")
+//        "/index"(controller: "login", action: "auth")\
+        "/"(controller: "login", action: "auth")
+        "/index"(controller: "login", action: "auth")
+
+
+
+        // ========== LOGIN ==========
         "/login/auth"(controller: "login", action: "auth")
         "/login/authenticate"(controller: "login", action: "authenticate")
         "/login/success"(controller: "login", action: "success")
         "/login/authfail"(controller: "login", action: "authfail")
-
+        "/login/testAuth"(controller: "login", action: "testAuth")
         "/logout"(controller: "logout", action: "index")
 
+        // ========== DASHBOARD ==========
         "/dashboard/admin"(controller: "dashboard", action: "admin")
         "/dashboard/supervisor"(controller: "dashboard", action: "supervisor")
         "/dashboard/intern"(controller: "dashboard", action: "intern")
+        "/dashboard/index"(controller: "dashboard", action: "index")
 
+        // ========== INTERN ==========
+        "/intern"(controller: "intern", action: "index")
+        "/intern/index"(controller: "intern", action: "index")
+        "/intern/create"(controller: "intern", action: "create")
+        "/intern/save"(controller: "intern", action: "save")
+        "/intern/show/$id"(controller: "intern", action: "show")
+        "/intern/edit/$id"(controller: "intern", action: "edit")
+        "/intern/update/$id"(controller: "intern", action: "update")
+        "/intern/delete/$id"(controller: "intern", action: "delete")
 
+        // ========== USER ==========
         "/user"(controller: "user", action: "index")
         "/user/index"(controller: "user", action: "index")
         "/user/create"(controller: "user", action: "create")
@@ -264,6 +341,9 @@ class UrlMappings {
         "/user/update/$id"(controller: "user", action: "update")
         "/user/delete/$id"(controller: "user", action: "delete")
 
+        "/test"(view: '/test')
+
+        // ========== ERROR ==========
         "500"(view: '/error')
         "404"(view: '/notFound')
     }
