@@ -22,7 +22,7 @@
   }
   </style>
 </head>
-<body>
+
 <div class="container-fluid">
   <div class="row mb-4">
     <div class="col-12">
@@ -239,5 +239,5 @@
     } else strengthBar.hide().html('');
   }
 </script>
-</body>
+
 </html>

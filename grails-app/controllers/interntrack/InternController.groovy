@@ -6,7 +6,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
-//@Secured(['ROLE_SUPERVISOR', 'ROLE_ADMIN'])
+@Secured(['ROLE_SUPERVISOR', 'ROLE_ADMIN'])
 @Transactional
 class InternController {
 
@@ -48,10 +48,65 @@ class InternController {
     }
 
     // ============== Create ==============
+//    def create() {
+//        render(view: 'create', model: getCreateModel())
+//    }
+//    def create() {
+//
+//        def calendar = Calendar.getInstance()
+//        calendar.add(Calendar.DAY_OF_MONTH, 90)
+//
+//        [
+//                intern: new Intern(),
+//                supervisors: Supervisor.list(),
+//                yearOfStudyList: ['1','2','3','4'],
+//                defaultEndDate: calendar.time
+//        ]
+//    }
     def create() {
-        render(view: 'create', model: getCreateModel())
-    }
+        println "=== Create Intern ==="
 
+        try {
+            // ✅ جلب قائمة المشرفين مع التأكد من عدم وجود null
+            def supervisors = Supervisor.list().findAll { it != null && it.user != null }
+
+            // ✅ قائمة سنوات الدراسة
+            def yearOfStudyList = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
+
+            // ✅ تاريخ انتهاء افتراضي (90 يوم من اليوم)
+            def calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_MONTH, 90)
+            def defaultEndDate = calendar.time
+
+            println "Found ${supervisors?.size() ?: 0} supervisors"
+
+            if (supervisors) {
+                println "First supervisor: ${supervisors[0]?.user?.fullName} - ID: ${supervisors[0]?.id}"
+            }
+
+            render(view: 'create', model: [
+                    intern: new Intern(),
+                    supervisors: supervisors ?: [],
+                    yearOfStudyList: yearOfStudyList,
+                    defaultEndDate: defaultEndDate
+            ])
+
+        } catch (Exception e) {
+            println "Error in create: ${e.message}"
+            e.printStackTrace()
+
+            // ✅ Model آمن
+            def calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_MONTH, 90)
+
+            render(view: 'create', model: [
+                    intern: new Intern(),
+                    supervisors: [],
+                    yearOfStudyList: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'],
+                    defaultEndDate: calendar.time
+            ])
+        }
+    }
     // ============== Save ==============
     @Transactional
     def save() {

@@ -38,7 +38,7 @@ grails:
 #                defaultTargetUrl: '/dashboard/index'
             successHandler:
                 defaultTargetUrl: '/login/success'
-                alwaysUseDefaultTargetUrl: true
+                alwaysUseDefaultTargetUrl: false
 
             failureHandler:
                 defaultFailureUrl: '/login/auth?error'

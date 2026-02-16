@@ -1,357 +1,228 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="layouts" content="main"/>
-  <title>Intern Details - InternTrack</title>
+  <meta name="layout" content="main"/>
+  <meta name="active-interns" content="true"/>
+  <title>Intern Profile - InternTrack</title>
+
   <style>
-  .profile-container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .profile-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    overflow: hidden;
-  }
-
   .profile-header {
-    background: linear-gradient(135deg, #2C3E50, #3498DB);
-    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .profile-avatar {
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    font-weight: bold;
-    color: white;
-  }
-
-  .profile-title h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-  }
-
-  .profile-title p {
-    margin: 5px 0 0;
-    opacity: 0.9;
-    font-size: 16px;
-  }
-
-  .profile-body {
     padding: 30px;
-  }
-
-  .info-section {
-    background: #F8F9FA;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 10px;
     margin-bottom: 25px;
   }
 
-  .info-section h3 {
-    color: #2C3E50;
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
+  .stat-box {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
 
-  .info-section h3 i {
-    margin-right: 10px;
-    color: #1ABC9C;
-  }
-
-  .info-grid {
-    display: flex;
-    flex-wrap: wrap;
-    margin: -10px;
-  }
-
-  .info-item {
-    width: 33.333%;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  .info-label {
-    font-size: 12px;
-    color: #7F8C8D;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .info-value {
-    font-size: 16px;
-    color: #2C3E50;
-    font-weight: 500;
-  }
-
-  .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .status-active {
-    background: #d4edda;
-    color: #155724;
-  }
-
-  .status-completed {
-    background: #cce5ff;
-    color: #004085;
-  }
-
-  .status-terminated {
-    background: #f8d7da;
-    color: #721c24;
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-  }
-
-  .btn-edit {
-    background: #3498DB;
-    color: white;
-  }
-
-  .btn-delete {
-    background: #E74C3C;
-    color: white;
-  }
-
-  .btn-back {
-    background: #ECF0F1;
-    color: #7F8C8D;
-  }
-
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-  }
-
-  @media (max-width: 768px) {
-    .info-item {
-      width: 100%;
-    }
-    .profile-header {
-      flex-direction: column;
-      text-align: center;
-    }
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
   }
   </style>
 </head>
-<body>
-<div class="profile-container">
-  <div class="profile-card">
-    <div class="profile-header">
-      <div class="profile-avatar">
-        ${intern?.user?.fullName?.split(' ').collect { it[0] }.join()?.toUpperCase() ?: 'I'}
+
+<div class="container-fluid">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <div class="avatar-lg me-4 bg-white text-primary" style="font-size: 2.5rem;">
+          ${intern.user?.initials ?: 'U'}
+        </div>
+        <div>
+          <h1 class="mb-2">${intern.user?.fullName}</h1>
+          <p class="mb-1">${intern.university} - ${intern.major}</p>
+          <p class="mb-0">Student ID: ${intern.studentId}</p>
+        </div>
       </div>
-      <div class="profile-title">
-        <h1>${intern?.user?.fullName}</h1>
-        <p><i class="fas fa-id-card"></i> ${intern?.studentId}</p>
+      <span class="badge bg-light text-dark p-3">
+        <i class="fas fa-calendar me-2"></i>
+        ${intern.remainingDays} days remaining
+      </span>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stat-box">
+        <div class="stat-number">${taskStats?.completed ?: 0}/${taskStats?.total ?: 0}</div>
+        <div class="text-muted">Tasks Completed</div>
       </div>
     </div>
-
-    <div class="profile-body">
-      <!-- Personal Information -->
-      <div class="info-section">
-        <h3>
-          <i class="fas fa-user-circle"></i>
-          Personal Information
-        </h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Full Name</div>
-            <div class="info-value">${intern?.user?.fullName}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Email</div>
-            <div class="info-value">${intern?.user?.email}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Phone</div>
-            <div class="info-value">${intern?.user?.phone ?: 'N/A'}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Student ID</div>
-            <div class="info-value">${intern?.studentId}</div>
-          </div>
-        </div>
+    <div class="col-md-3">
+      <div class="stat-box">
+        <div class="stat-number">${reportStats?.approved ?: 0}/${reportStats?.total ?: 0}</div>
+        <div class="text-muted">Reports Approved</div>
       </div>
-
-      <!-- Academic Information -->
-      <div class="info-section">
-        <h3>
-          <i class="fas fa-graduation-cap"></i>
-          Academic Information
-        </h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">University</div>
-            <div class="info-value">${intern?.university}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Major</div>
-            <div class="info-value">${intern?.major}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Department</div>
-            <div class="info-value">${intern?.department ?: 'N/A'}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Year of Study</div>
-            <div class="info-value">${intern?.yearOfStudy ?: 'N/A'}</div>
-          </div>
-        </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-box">
+        <div class="stat-number">${evalStats?.averageScore ?: 0}%</div>
+        <div class="text-muted">Average Score</div>
       </div>
-
-      <!-- Internship Details -->
-      <div class="info-section">
-        <h3>
-          <i class="fas fa-briefcase"></i>
-          Internship Details
-        </h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Supervisor</div>
-            <div class="info-value">
-              <a href="#">${intern?.supervisor?.user?.fullName}</a>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Start Date</div>
-            <div class="info-value">
-              <g:formatDate date="${intern?.startDate}" format="dd MMM yyyy"/>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">End Date</div>
-            <div class="info-value">
-              <g:formatDate date="${intern?.endDate}" format="dd MMM yyyy"/>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Status</div>
-            <div class="info-value">
-              <span class="status-badge status-${intern?.status?.toLowerCase()}">
-                ${intern?.status}
-              </span>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Total Hours</div>
-            <div class="info-value">${intern?.totalHours} hrs</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Days Remaining</div>
-            <div class="info-value">
-              <g:if test="${intern?.status == 'ACTIVE'}">
-                ${intern?.remainingDays} days
-              </g:if>
-              <g:else>
-                -
-              </g:else>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    <!-- Emergency Contact -->
-      <g:if test="${intern?.emergencyContact || intern?.emergencyPhone}">
-        <div class="info-section">
-          <h3>
-            <i class="fas fa-phone-alt"></i>
-            Emergency Contact
-          </h3>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Contact Name</div>
-              <div class="info-value">${intern?.emergencyContact ?: 'N/A'}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Contact Phone</div>
-              <div class="info-value">${intern?.emergencyPhone ?: 'N/A'}</div>
-            </div>
-          </div>
-        </div>
-      </g:if>
-
-    <!-- Notes -->
-      <g:if test="${intern?.notes}">
-        <div class="info-section">
-          <h3>
-            <i class="fas fa-sticky-note"></i>
-            Notes
-          </h3>
-          <p style="margin:0; color:#2C3E50;">${intern?.notes}</p>
-        </div>
-      </g:if>
-
-    <!-- Action Buttons -->
-      <div class="action-buttons">
-        <g:link controller="intern" action="index" class="btn btn-back">
-          <i class="fas fa-arrow-left"></i> Back to List
-        </g:link>
-
-        <sec:ifAnyGranted roles="ROLE_ADMIN">
-          <g:link controller="intern" action="edit" id="${intern?.id}" class="btn btn-edit">
-            <i class="fas fa-edit"></i> Edit
-          </g:link>
-
-          <g:link controller="intern" action="delete" id="${intern?.id}"
-                  class="btn btn-delete"
-                  onclick="return confirm('Are you sure you want to delete this intern?');">
-            <i class="fas fa-trash"></i> Delete
-          </g:link>
-        </sec:ifAnyGranted>
-
-        <sec:ifAnyGranted roles="ROLE_SUPERVISOR">
-          <g:if test="${springSecurityService.currentUser?.id == intern?.supervisor?.user?.id}">
-            <g:link controller="intern" action="edit" id="${intern?.id}" class="btn btn-edit">
-              <i class="fas fa-edit"></i> Edit
-            </g:link>
-          </g:if>
-        </sec:ifAnyGranted>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-box">
+        <div class="stat-number">${intern.totalHours ?: 0}</div>
+        <div class="text-muted">Total Hours</div>
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <!-- Personal Info -->
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Personal Information</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <tr>
+              <td class="text-muted">Email:</td>
+              <td>${intern.user?.email}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Phone:</td>
+              <td>${intern.emergencyPhone ?: 'N/A'}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Emergency Contact:</td>
+              <td>${intern.emergencyContact ?: 'N/A'}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Department:</td>
+              <td>${intern.department ?: 'N/A'}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Year of Study:</td>
+              <td>${intern.yearOfStudy ?: 'N/A'}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Internship Period -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Internship Period</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="text-muted small">Start Date</label>
+            <p class="fw-bold"><g:formatDate date="${intern.startDate}" format="dd MMMM yyyy"/></p>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted small">End Date</label>
+            <p class="fw-bold"><g:formatDate date="${intern.endDate}" format="dd MMMM yyyy"/></p>
+          </div>
+          <div class="progress" style="height: 10px;">
+            <div class="progress-bar" style="width: ${intern.remainingDays < 0 ? 100 : (60 - intern.remainingDays) * 100 / 60}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-md-8">
+      <!-- Tasks -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+          <h5 class="mb-0">Recent Tasks</h5>
+          <g:link controller="task" action="create" params="[internId: intern.id]" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> Add Task
+          </g:link>
+        </div>
+        <div class="card-body">
+          <g:if test="${recentTasks}">
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <g:each in="${recentTasks}" var="task">
+                  <tr>
+                    <td><g:link controller="task" action="show" id="${task.id}">${task.title}</g:link></td>
+                    <td><g:formatDate date="${task.dueDate}" format="dd/MM/yyyy"/></td>
+                    <td><span class="badge bg-${task.status == 'COMPLETED' ? 'success' : task.status == 'OVERDUE' ? 'danger' : 'warning'}">${task.status}</span></td>
+                  </tr>
+                </g:each>
+                </tbody>
+              </table>
+            </div>
+          </g:if>
+          <g:else>
+            <p class="text-muted text-center py-3 mb-0">No tasks assigned</p>
+          </g:else>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+          <h5 class="mb-0">Weekly Reports</h5>
+          <g:link controller="weeklyReport" action="create" params="[internId: intern.id]" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> New Report
+          </g:link>
+        </div>
+        <div class="card-body">
+          <g:if test="${recentReports}">
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                <tr>
+                  <th>Week</th>
+                  <th>Date</th>
+                  <th>Hours</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <g:each in="${recentReports}" var="report">
+                  <tr>
+                    <td>Week ${report.weekNumber}</td>
+                    <td><g:formatDate date="${report.reportDate}" format="dd/MM/yyyy"/></td>
+                    <td>${report.hoursWorked}</td>
+                    <td><span class="badge bg-${report.status == 'APPROVED' ? 'success' : report.status == 'REJECTED' ? 'danger' : 'warning'}">${report.status}</span></td>
+                  </tr>
+                </g:each>
+                </tbody>
+              </table>
+            </div>
+          </g:if>
+          <g:else>
+            <p class="text-muted text-center py-3 mb-0">No reports submitted</p>
+          </g:else>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mb-4">
+    <g:link controller="intern" action="edit" id="${intern.id}" class="btn btn-warning">
+      <i class="fas fa-edit me-2"></i>
+      Edit Profile
+    </g:link>
+    <g:link controller="evaluation" action="create" params="[internId: intern.id]" class="btn btn-success">
+      <i class="fas fa-star me-2"></i>
+      Add Evaluation
+    </g:link>
+  </div>
 </div>
-</body>
+
 </html>

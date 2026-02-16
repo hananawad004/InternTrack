@@ -23,7 +23,7 @@
   <title>User Details - ${user.username}</title>
   <asset:stylesheet src="bootstrap.css"/>
 </head>
-<body>
+
 <div class="container mt-4">
   <div class="row mb-3">
     <div class="col-12">
@@ -163,5 +163,5 @@
     </div>
   </div>
 </div>
-</body>
+
 </html>

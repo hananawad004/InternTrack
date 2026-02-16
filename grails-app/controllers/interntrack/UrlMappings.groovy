@@ -289,8 +289,68 @@
 //        "404"(view: '/notFound')
 //    }
 //}
-package interntrack
 
+
+//class UrlMappings {
+//
+//    static mappings = {
+//        "/$controller/$action?/$id?(.$format)?"{
+//            constraints {
+//                // apply constraints here
+//            }
+//        }
+//
+////        "/"(controller: "login", action: "auth")
+////        "/index"(controller: "login", action: "auth")\
+//        "/"(controller: "login", action: "auth")
+//        "/index"(controller: "login", action: "auth")
+//
+//
+//
+//        // ========== LOGIN ==========
+//        "/login/auth"(controller: "login", action: "auth")
+//        "/login/authenticate"(controller: "login", action: "authenticate")
+//        "/login/success"(controller: "login", action: "success")
+//        "/login/authfail"(controller: "login", action: "authfail")
+//        "/login/testAuth"(controller: "login", action: "testAuth")
+//        "/logout"(controller: "logout", action: "index")
+//
+//        // ========== DASHBOARD ==========
+//        "/dashboard/admin"(controller: "dashboard", action: "admin")
+//        "/dashboard/supervisor"(controller: "dashboard", action: "supervisor")
+//        "/dashboard/intern"(controller: "dashboard", action: "intern")
+//        "/dashboard/index"(controller: "dashboard", action: "index")
+//
+//        // ========== INTERN ==========
+//        "/intern"(controller: "intern", action: "index")
+//        "/intern/index"(controller: "intern", action: "index")
+//        "/intern/create"(controller: "intern", action: "create")
+//        "/intern/save"(controller: "intern", action: "save")
+//        "/intern/show/$id"(controller: "intern", action: "show")
+//        "/intern/edit/$id"(controller: "intern", action: "edit")
+//        "/intern/update/$id"(controller: "intern", action: "update")
+//        "/intern/delete/$id"(controller: "intern", action: "delete")
+//
+//        // ========== USER ==========
+//        "/user"(controller: "user", action: "index")
+//        "/user/index"(controller: "user", action: "index")
+//        "/user/create"(controller: "user", action: "create")
+//        "/user/save"(controller: "user", action: "save")
+//        "/user/show/$id"(controller: "user", action: "show")
+//        "/user/edit/$id"(controller: "user", action: "edit")
+//        "/user/update/$id"(controller: "user", action: "update")
+//        "/user/delete/$id"(controller: "user", action: "delete")
+//
+//        "/test"(view: '/test')
+//
+//        // ========== ERROR ==========
+//        "500"(view: '/error')
+//        "404"(view: '/notFound')
+//    }
+//}
+// grails-app/controllers/interntrack/UrlMappings.groovy
+
+package interntrack
 class UrlMappings {
 
     static mappings = {
@@ -300,12 +360,8 @@ class UrlMappings {
             }
         }
 
-//        "/"(controller: "login", action: "auth")
-//        "/index"(controller: "login", action: "auth")\
         "/"(controller: "login", action: "auth")
         "/index"(controller: "login", action: "auth")
-
-
 
         // ========== LOGIN ==========
         "/login/auth"(controller: "login", action: "auth")
@@ -341,6 +397,30 @@ class UrlMappings {
         "/user/update/$id"(controller: "user", action: "update")
         "/user/delete/$id"(controller: "user", action: "delete")
 
+        // ========== WEEKLY REPORT ==========
+        "/weeklyReport/index"(controller: "weeklyReport", action: "index")
+        "/weeklyReport/create"(controller: "weeklyReport", action: "create")
+        "/weeklyReport/save"(controller: "weeklyReport", action: "save")
+        "/weeklyReport/show/$id"(controller: "weeklyReport", action: "show")
+        "/weeklyReport/edit/$id"(controller: "weeklyReport", action: "edit")
+        "/weeklyReport/update/$id"(controller: "weeklyReport", action: "update")
+        "/weeklyReport/delete/$id"(controller: "weeklyReport", action: "delete")
+        "/weeklyReport/review/$id"(controller: "weeklyReport", action: "reviewReport")  // ✅ جديد
+        "/weeklyReport/updateStatus"(controller: "weeklyReport", action: "updateStatus")
+
+        // ========== ATTACHMENT ==========
+        "/attachment/download/$id"(controller: "attachment", action: "download")      // ✅ جديد
+        "/attachment/preview/$id"(controller: "attachment", action: "preview")        // ✅ جديد
+        "/attachment/delete/$id"(controller: "attachment", action: "delete")          // ✅ جديد
+        "/attachment/upload"(controller: "attachment", action: "upload")              // ✅ جديد
+// ========== TASK ==========
+        "/task/index"(controller: "task", action: "index")
+        "/task/create"(controller: "task", action: "create")
+        "/task/save"(controller: "task", action: "save")
+        "/task/show/$id"(controller: "task", action: "show")
+        "/task/edit/$id"(controller: "task", action: "edit")
+        "/task/update/$id"(controller: "task", action: "update")
+        "/task/delete/$id"(controller: "task", action: "delete")
         "/test"(view: '/test')
 
         // ========== ERROR ==========

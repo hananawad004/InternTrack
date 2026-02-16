@@ -24,7 +24,7 @@
   <asset:stylesheet src="bootstrap.css"/>
   <asset:stylesheet src="dataTables.bootstrap5.css"/>
 </head>
-<body>
+
 <div class="container-fluid mt-4">
   <div class="row mb-4">
     <div class="col-12">
@@ -137,5 +137,5 @@
     });
   });
 </script>
-</body>
+
 </html>

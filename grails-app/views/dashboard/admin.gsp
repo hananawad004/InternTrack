@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layouts" content="main"/>
+    <meta name="layout" content="main"/>
     <title>Admin Dashboard - InternTrack</title>
 
     <!-- CDN للـ Bootstrap و Font Awesome -->
@@ -604,7 +604,7 @@
     }
     </style>
 </head>
-<body>
+
 <div class="container-fluid">
     <!-- Welcome Section -->
     <div class="row mb-4">
@@ -981,5 +981,5 @@
         </div>
     </div>
 </div>
-</body>
+
 </html>

@@ -19,6 +19,46 @@ class FileUploadService {
         return uploadDir
     }
 
+//    Attachment uploadFile(MultipartFile file, String description = null) {
+//        if (file.empty) {
+//            throw new IllegalArgumentException("File is empty")
+//        }
+//
+//        // Create upload directory
+//        String uploadDir = getUploadDirectory()
+//        Path uploadPath = Paths.get(uploadDir)
+//
+//        if (!Files.exists(uploadPath)) {
+//            Files.createDirectories(uploadPath)
+//        }
+//
+//        // Generate unique filename
+//        String originalFilename = file.originalFilename
+//        String fileExtension = originalFilename.contains('.') ?
+//                originalFilename.substring(originalFilename.lastIndexOf('.')) : ''
+//        String storedFilename = UUID.randomUUID().toString() + fileExtension
+//        Path filePath = uploadPath.resolve(storedFilename)
+//
+//        // Save file
+//        Files.copy(file.inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
+//
+//        // Create attachment record
+//        Attachment attachment = new Attachment(
+//                originalFilename: originalFilename,
+//                storedFilename: storedFilename,
+//                filePath: filePath.toString(),
+//                fileSize: file.size,
+//                contentType: file.contentType,
+//                description: description
+//        )
+//
+//        if (!attachment.save(flush: true)) {
+//            Files.deleteIfExists(filePath)
+//            throw new RuntimeException("Failed to save attachment: ${attachment.errors}")
+//        }
+//
+//        return attachment
+//    }
     Attachment uploadFile(MultipartFile file, String description = null) {
         if (file.empty) {
             throw new IllegalArgumentException("File is empty")
@@ -49,7 +89,8 @@ class FileUploadService {
                 filePath: filePath.toString(),
                 fileSize: file.size,
                 contentType: file.contentType,
-                description: description
+                description: description,
+                dateUploaded: new Date()  // ✅ إضافة التاريخ هنا
         )
 
         if (!attachment.save(flush: true)) {
@@ -59,7 +100,6 @@ class FileUploadService {
 
         return attachment
     }
-
     boolean deleteFile(Attachment attachment) {
         if (!attachment) {
             return false
@@ -76,17 +116,17 @@ class FileUploadService {
         }
     }
 
-    byte[] getFileBytes(Attachment attachment) {
-        if (!attachment) {
-            return null
-        }
-
-        Path filePath = Paths.get(attachment.filePath)
-        if (Files.exists(filePath)) {
-            return Files.readAllBytes(filePath)
-        }
-        return null
-    }
+//    byte[] getFileBytes(Attachment attachment) {
+//        if (!attachment) {
+//            return null
+//        }
+//
+//        Path filePath = Paths.get(attachment.filePath)
+//        if (Files.exists(filePath)) {
+//            return Files.readAllBytes(filePath)
+//        }
+//        return null
+//    }
 
     boolean isValidFileType(MultipartFile file) {
         List<String> allowedTypes = [
@@ -106,5 +146,22 @@ class FileUploadService {
 
     Long getFileSizeLimit() {
         return 10 * 1024 * 1024 // 10MB
+    }
+    // أضف هذه الدالة في FileUploadService.groovy
+
+    byte[] getFileBytes(Attachment attachment) {
+        if (!attachment) {
+            return null
+        }
+
+        try {
+            Path filePath = Paths.get(attachment.filePath)
+            if (Files.exists(filePath)) {
+                return Files.readAllBytes(filePath)
+            }
+        } catch (Exception e) {
+            log.error("Error reading file: ${e.message}", e)
+        }
+        return null
     }
 }

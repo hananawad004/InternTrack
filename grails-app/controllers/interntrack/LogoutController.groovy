@@ -75,14 +75,90 @@
 //        redirect controller: 'login', action: 'auth'
 //    }
 //}
+//package interntrack
+//
+//import grails.plugin.springsecurity.annotation.Secured
+//
+//class LogoutController {
+//
+//    def index() {
+//        // Spring Security سيتولى تسجيل الخروج
+//        redirect uri: '/'
+//    }
+//}
 package interntrack
 
 import grails.plugin.springsecurity.annotation.Secured
+import grails.plugin.springsecurity.SpringSecurityService
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import grails.plugin.springsecurity.SpringSecurityUtils
 
+@Secured(['permitAll'])
 class LogoutController {
-
-    def index() {
-        // Spring Security سيتولى تسجيل الخروج
-        redirect uri: '/'
+    def springSecurityService
+    /**
+     * Index action. Redirects to the Spring security logout uri.
+     */
+    def index = {
+        // TODO put any pre-logout code here
+        if (springSecurityService.isLoggedIn()) {
+            println("---------------")
+            request.session.removeAttribute("failLoginCount")
+            session.invalidate()
+            redirect uri: SpringSecurityUtils.securityConfig.logout.filterProcessesUrl
+        }
+        /**
+         * remove failed login count form session.
+         */
+     // '/j_spring_security_logout'
     }
 }
+//class LogoutController {
+//
+//    SpringSecurityService springSecurityService
+//
+//    def index() {
+//        println " Logout initiated - Session ID: ${session.id}"
+//
+//        session.invalidate()
+//
+//        SecurityContextHolder.clearContext()
+//
+//        redirect(uri: '/login/auth')
+//    }
+//
+//    def secureLogout() {
+//        HttpServletRequest request = request
+//        HttpServletResponse response = response
+//
+//        def auth = SecurityContextHolder.context.authentication
+//        if (auth) {
+//            new SecurityContextLogoutHandler().logout(request, response, auth)
+//        }
+//
+//        session.invalidate()
+//        redirect(uri: '/login/auth')
+//    }
+//}
+//package interntrack
+//
+//import grails.plugin.springsecurity.annotation.Secured
+//import org.springframework.security.core.context.SecurityContextHolder
+//import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
+//
+//@Secured(['permitAll'])
+//class LogoutController {
+//
+//    def index() {
+//
+//        def auth = SecurityContextHolder.context.authentication
+//        if (auth) {
+//            new SecurityContextLogoutHandler().logout(request, response, auth)
+//        }
+//
+//        redirect(uri: '/login/auth')
+//    }
+//}

@@ -18,7 +18,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="layouts" content="main"/>
+  <meta name="layout" content="main"/>
   <title>Interns List - InternTrack</title>
   <style>
   .page-header {
@@ -206,7 +206,7 @@
   }
   </style>
 </head>
-<body>
+
 <div class="page-header">
   <div class="page-title">
     <h1><i class="fas fa-users"></i> Interns</h1>
@@ -288,5 +288,5 @@
     </g:link>
   </div>
 </g:else>
-</body>
+
 </html>

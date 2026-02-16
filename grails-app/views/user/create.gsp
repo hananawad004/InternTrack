@@ -23,7 +23,7 @@
   <title>Create New User</title>
   <asset:stylesheet src="bootstrap.css"/>
 </head>
-<body>
+
 <div class="container mt-4">
   <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -177,5 +177,5 @@
 </div>
 
 <asset:javascript src="bootstrap.bundle.js"/>
-</body>
+
 </html>

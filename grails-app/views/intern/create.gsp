@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layouts" content="main"/>
+    <meta name="layout" content="main"/>
     <title>Create New Intern - InternTrack</title>
     <style>
     .form-container {
@@ -207,7 +207,7 @@
     }
     </style>
 </head>
-<body>
+
 <div class="form-container">
     <div class="form-card">
         <div class="form-header">
@@ -418,20 +418,54 @@
                         </div>
                     </div>
 
+%{--                    <div class="col-md-6">--}%
+%{--                        <div class="form-group">--}%
+%{--                            <label class="form-label">--}%
+%{--                                <i class="fas fa-user-tie"></i>--}%
+%{--                                Supervisor <span class="required">*</span>--}%
+%{--                            </label>--}%
+%{--                            <g:select name="supervisorId"--}%
+%{--                                      from="${supervisors}"--}%
+%{--                                      optionKey="id"--}%
+%{--                                      optionValue="${{ it.user?.fullName + ' - ' + it.position }}"--}%
+%{--                                      value="${intern?.supervisor?.id}"--}%
+%{--                                      noSelection="['': '-- Select Supervisor --']"--}%
+%{--                                      class="form-control ${hasErrors(bean: intern, field: 'supervisor', 'is-invalid')}"--}%
+%{--                                      required=""/>--}%
+%{--                            <g:hasErrors bean="${intern}" field="supervisor">--}%
+%{--                                <div class="invalid-feedback">--}%
+%{--                                    <g:eachError bean="${intern}" field="supervisor">--}%
+%{--                                        <g:message error="${it}"/>--}%
+%{--                                    </g:eachError>--}%
+%{--                                </div>--}%
+%{--                            </g:hasErrors>--}%
+%{--                        </div>--}%
+%{--                    </div>--}%
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-user-tie"></i>
                                 Supervisor <span class="required">*</span>
                             </label>
-                            <g:select name="supervisorId"
-                                      from="${supervisors}"
-                                      optionKey="id"
-                                      optionValue="${{ it.user?.fullName + ' - ' + it.position }}"
-                                      value="${intern?.supervisor?.id}"
-                                      noSelection="['': '-- Select Supervisor --']"
-                                      class="form-control ${hasErrors(bean: intern, field: 'supervisor', 'is-invalid')}"
-                                      required=""/>
+
+
+                            <g:if test="${supervisors && supervisors.size() > 0}">
+                                <g:select name="supervisorId"
+                                          from="${supervisors}"
+                                          optionKey="id"
+                                          optionValue="${{ it.user?.fullName ? it.user.fullName + ' - ' + it.position : 'Unknown Supervisor' }}"
+                                          value="${intern?.supervisor?.id}"
+                                          noSelection="['': '-- Select Supervisor --']"
+                                          class="form-control ${hasErrors(bean: intern, field: 'supervisor', 'is-invalid')}"
+                                          required=""/>
+                            </g:if>
+                            <g:else>
+                                <select name="supervisorId" class="form-control" required>
+                                    <option value="">-- No Supervisors Available --</option>
+                                </select>
+                                <div class="form-text text-danger">No supervisors found. Please create a supervisor first.</div>
+                            </g:else>
+
                             <g:hasErrors bean="${intern}" field="supervisor">
                                 <div class="invalid-feedback">
                                     <g:eachError bean="${intern}" field="supervisor">
@@ -441,7 +475,6 @@
                             </g:hasErrors>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label">
@@ -546,5 +579,5 @@
         });
     });
 </script>
-</body>
+
 </html>

@@ -1,65 +1,176 @@
-//
+////
+////package interntrack
+////
+////import grails.plugin.springsecurity.SpringSecurityService
+////import org.springframework.security.core.context.SecurityContextHolder
+////
+////class LoginController {
+////
+////    SpringSecurityService springSecurityService
+////
+////    def auth() {
+////        // التحقق من المستخدم المسجل
+////        if (springSecurityService.isLoggedIn()) {
+////            redirect(controller: 'dashboard', action: 'index')
+////            return
+////        }
+////
+////        render(view: 'auth')
+////    }
+////
+////    def authenticate() {
+////        // Spring Security بتعامل مع المصادقة تلقائياً
+////        redirect(action: 'success')
+////    }
+////
+////    def success() {
+////        redirect(controller: 'dashboard', action: 'index')
+////    }
+////
+////    def authfail() {
+////        flash.error = "Invalid username or password"
+////        redirect(action: 'auth')
+////    }
+////
+////    def denied() {
+////        render(view: 'denied')
+////    }
+////
+////    def testAuth() {
+////        def username = params.username
+////        def password = getDefaultPassword(username)
+////
+////        if (!password) {
+////            flash.error = "No default password for user: ${username}"
+////            redirect(action: 'auth')
+////            return
+////        }
+////
+////        try {
+////            springSecurityService.reauthenticate(username, password)
+////
+////            if (springSecurityService.isLoggedIn()) {
+////                redirect(controller: 'dashboard', action: 'index')
+////            } else {
+////                flash.error = "Login failed"
+////                redirect(action: 'auth')
+////            }
+////        } catch (Exception e) {
+////            flash.error = "Error: ${e.message}"
+////            redirect(action: 'auth')
+////        }
+////    }
+////
+////    private String getDefaultPassword(String username) {
+////        def passwords = [
+////                'admin@intern.com': 'admin123',
+////                'ahmed.supervisor@company.com': 'super123',
+////                'mohammed.student@university.edu': 'intern123'
+////        ]
+////        return passwords[username]
+////    }
+////}
 //package interntrack
 //
 //import grails.plugin.springsecurity.SpringSecurityService
 //import org.springframework.security.core.context.SecurityContextHolder
+//import grails.plugin.springsecurity.SpringSecurityUtils
 //
 //class LoginController {
 //
 //    SpringSecurityService springSecurityService
 //
 //    def auth() {
-//        // التحقق من المستخدم المسجل
+//        // If user is already logged in - go to dashboard
 //        if (springSecurityService.isLoggedIn()) {
-//            redirect(controller: 'dashboard', action: 'index')
+//            redirectToDashboard()
+//            return
+//        }
+//        render(view: 'auth')
+//    }
+////
+////    def authenticate() {
+////        // Spring Security handles authentication automatically
+////        redirect(action: 'success')
+////    }
+//
+//    def success() {
+//        // New login - check role and redirect to appropriate dashboard
+//        if (!springSecurityService.isLoggedIn()) {
+//            redirect(action: 'auth')
 //            return
 //        }
 //
-//        render(view: 'auth')
-//    }
-//
-//    def authenticate() {
-//        // Spring Security بتعامل مع المصادقة تلقائياً
-//        redirect(action: 'success')
-//    }
-//
-//    def success() {
-//        redirect(controller: 'dashboard', action: 'index')
+//        redirectToDashboard()
 //    }
 //
 //    def authfail() {
-//        flash.error = "Invalid username or password"
+//        flash.error = "❌ Invalid username or password"
 //        redirect(action: 'auth')
 //    }
 //
 //    def denied() {
+//        flash.error = "⛔ You don't have permission to access this page"
 //        render(view: 'denied')
 //    }
 //
-//    def testAuth() {
-//        def username = params.username
-//        def password = getDefaultPassword(username)
+////    def testAuth() {
+////        def username = params.username
+////        def password = getDefaultPassword(username)
+////
+////        if (!password) {
+////            flash.error = "❌ No default password found for user: ${username}"
+////            redirect(action: 'auth')
+////            return
+////        }
+////
+////        try {
+////            springSecurityService.reauthenticate(username, password)
+////
+////            if (springSecurityService.isLoggedIn()) {
+////                redirectToDashboard()
+////            } else {
+////                flash.error = "❌ Login failed"
+////                redirect(action: 'auth')
+////            }
+////        } catch (Exception e) {
+////            flash.error = "❌ Error: ${e.message}"
+////            redirect(action: 'auth')
+////        }
+////    }
 //
-//        if (!password) {
-//            flash.error = "No default password for user: ${username}"
-//            redirect(action: 'auth')
-//            return
-//        }
+//    // ========== Helper Methods ==========
+////
+////    private void redirectToDashboard() {
+////        if (springSecurityService.ifAnyGranted('ROLE_ADMIN')) {
+////            redirect(controller: 'dashboard', action: 'admin')
+////        } else if (springSecurityService.ifAnyGranted('ROLE_SUPERVISOR')) {
+////            redirect(controller: 'dashboard', action: 'supervisor')
+////        } else if (springSecurityService.ifAnyGranted('ROLE_INTERN')) {
+////            redirect(controller: 'dashboard', action: 'intern')
+////        } else {
+////            // If no role found - go to home page
+////            redirect(uri: '/')
+////        }
+////    }
+//    private void redirectToDashboard() {
 //
-//        try {
-//            springSecurityService.reauthenticate(username, password)
+//        def authorities = springSecurityService.authentication?.authorities*.authority
 //
-//            if (springSecurityService.isLoggedIn()) {
-//                redirect(controller: 'dashboard', action: 'index')
-//            } else {
-//                flash.error = "Login failed"
-//                redirect(action: 'auth')
-//            }
-//        } catch (Exception e) {
-//            flash.error = "Error: ${e.message}"
-//            redirect(action: 'auth')
+//        if (authorities?.contains('ROLE_ADMIN')) {
+//            redirect(controller: 'dashboard', action: 'admin')
+//
+//        } else if (authorities?.contains('ROLE_SUPERVISOR')) {
+//            redirect(controller: 'dashboard', action: 'supervisor')
+//
+//        } else if (authorities?.contains('ROLE_INTERN')) {
+//            redirect(controller: 'dashboard', action: 'intern')
+//
+//        } else {
+//            redirect(uri: '/')
 //        }
 //    }
+//
 //
 //    private String getDefaultPassword(String username) {
 //        def passwords = [
@@ -88,22 +199,77 @@ class LoginController {
         }
         render(view: 'auth')
     }
-//
-//    def authenticate() {
-//        // Spring Security handles authentication automatically
-//        redirect(action: 'success')
-//    }
 
+//    def success() {
+//        def user = springSecurityService.currentUser
+//
+//        if (user) {
+//            session.user = user
+//            session.userId = user.id
+//            session.username = user.username
+//            session.fullName = user.fullName
+//
+//            def initials = ""
+//            if (user.fullName) {
+//                def names = user.fullName.split(' ')
+//                initials = names.collect { it[0]?.toUpperCase() }.join()
+//            }
+//            if (!initials) {
+//                initials = user.username[0]?.toUpperCase() ?: 'U'
+//            }
+//            session.initials = initials
+//
+//            def authorities = springSecurityService.authentication?.authorities*.authority
+//            session.authorities = authorities
+//            session.role = authorities?.find() ?: 'ROLE_GUEST'
+//
+//            println "✅ User logged in: ${user.username}"
+//            println "✅ Role: ${session.role}"
+//            println "✅ Session ID: ${session.id}"
+//        }
+//
+//        redirectToDashboard()
+//    }
     def success() {
-        // New login - check role and redirect to appropriate dashboard
-        if (!springSecurityService.isLoggedIn()) {
-            redirect(action: 'auth')
-            return
+        def user = springSecurityService.currentUser
+
+        if (user) {
+            // ✅ تخزين user كامل
+            session.user = user
+            session.userId = user.id
+            session.username = user.username
+            session.fullName = user.fullName
+
+            // ✅ تخزين initials مباشرة في session
+            def initials = ""
+            if (user.fullName) {
+                def names = user.fullName.split(' ')
+                initials = names.collect { it[0]?.toUpperCase() }.join()
+            }
+            if (!initials) {
+                initials = user.username[0]?.toUpperCase() ?: 'U'
+            }
+            session.initials = initials
+
+            // ✅ تخزين authorities في session
+            def authorities = springSecurityService.authentication?.authorities*.authority
+            session.authorities = authorities
+
+            // ✅ مهم جداً: تخزين authorities داخل user object كمان
+//            if (session.user) {
+//                session.user.authorities = authorities.collect { [authority: it] }
+//            }
+
+            session.role = authorities?.find() ?: 'ROLE_GUEST'
+
+            println "✅ User logged in: ${user.username}"
+            println "✅ Role: ${session.role}"
+            println "✅ Authorities: ${session.authorities}"
+            println "✅ Session ID: ${session.id}"
         }
 
         redirectToDashboard()
     }
-
     def authfail() {
         flash.error = "❌ Invalid username or password"
         redirect(action: 'auth')
@@ -114,63 +280,21 @@ class LoginController {
         render(view: 'denied')
     }
 
-//    def testAuth() {
-//        def username = params.username
-//        def password = getDefaultPassword(username)
-//
-//        if (!password) {
-//            flash.error = "❌ No default password found for user: ${username}"
-//            redirect(action: 'auth')
-//            return
-//        }
-//
-//        try {
-//            springSecurityService.reauthenticate(username, password)
-//
-//            if (springSecurityService.isLoggedIn()) {
-//                redirectToDashboard()
-//            } else {
-//                flash.error = "❌ Login failed"
-//                redirect(action: 'auth')
-//            }
-//        } catch (Exception e) {
-//            flash.error = "❌ Error: ${e.message}"
-//            redirect(action: 'auth')
-//        }
-//    }
-
     // ========== Helper Methods ==========
-//
-//    private void redirectToDashboard() {
-//        if (springSecurityService.ifAnyGranted('ROLE_ADMIN')) {
-//            redirect(controller: 'dashboard', action: 'admin')
-//        } else if (springSecurityService.ifAnyGranted('ROLE_SUPERVISOR')) {
-//            redirect(controller: 'dashboard', action: 'supervisor')
-//        } else if (springSecurityService.ifAnyGranted('ROLE_INTERN')) {
-//            redirect(controller: 'dashboard', action: 'intern')
-//        } else {
-//            // If no role found - go to home page
-//            redirect(uri: '/')
-//        }
-//    }
-    private void redirectToDashboard() {
 
+    private void redirectToDashboard() {
         def authorities = springSecurityService.authentication?.authorities*.authority
 
         if (authorities?.contains('ROLE_ADMIN')) {
             redirect(controller: 'dashboard', action: 'admin')
-
         } else if (authorities?.contains('ROLE_SUPERVISOR')) {
             redirect(controller: 'dashboard', action: 'supervisor')
-
         } else if (authorities?.contains('ROLE_INTERN')) {
             redirect(controller: 'dashboard', action: 'intern')
-
         } else {
             redirect(uri: '/')
         }
     }
-
 
     private String getDefaultPassword(String username) {
         def passwords = [
@@ -180,4 +304,5 @@ class LoginController {
         ]
         return passwords[username]
     }
+
 }
