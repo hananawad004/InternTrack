@@ -59,8 +59,13 @@
         </div>
 
         <div class="card-body">
-          <g:form action="update" method="POST" class="needs-validation" novalidate="novalidate">
-            <g:hiddenField name="version" value="${user.version}" />
+%{--          <g:form action="update" method="POST" class="needs-validation" novalidate="novalidate">--}%
+%{--            <g:hiddenField name="version" value="${user.version}" />--}%
+%{--          <g:form url="[action:'update', id:user.id]" method="POST">--}%
+%{--            <g:hiddenField name="id" value="${user.id}" />--}%
+          <g:form controller="user" action="update" method="POST">
+            <g:hiddenField name="id" value="${user.id}"/>
+
 
             <!-- User Info -->
             <div class="row mb-4">

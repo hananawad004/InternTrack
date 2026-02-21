@@ -1,123 +1,77 @@
-//// File: grails-app/domain/intern/track/Evaluation.groovy
-//package interntrack
-//
-//class Evaluation {
-//
-//    Date evaluationDate = new Date()
-//    Integer technicalSkills = 5 // 1-10
-//    Integer communicationSkills = 5 // 1-10
-//    Integer teamwork = 5 // 1-10
-//    Integer initiative = 5 // 1-10
-//    Integer punctuality = 5 // 1-10
-//    Integer problemSolving = 5 // 1-10
-//    Integer adaptability = 5 // 1-10
-//    String strengths
-//    String areasForImprovement
-//    String overallComments
-//    Integer overallScore
-//    String evaluatorName
-//    String recommendations
-//
-//
-//    // Relationships
-//    static belongsTo = [intern: Intern]
-//
-//    static constraints = {
-//        evaluationDate nullable: false
-//        technicalSkills range: 1..10
-//        communicationSkills range: 1..10
-//        teamwork range: 1..10
-//        initiative range: 1..10
-//        punctuality range: 1..10
-//        problemSolving range: 1..10
-//        adaptability range: 1..10
-//        strengths nullable: true, maxSize: 2000
-//        areasForImprovement nullable: true, maxSize: 2000
-//        overallComments nullable: true, maxSize: 3000
-//        overallScore range: 10..100
-//        evaluatorName blank: false
-//        recommendations nullable: true, maxSize: 2000
-//    }
-//
-//    def beforeInsert() {
-//        calculateOverallScore()
-//    }
-//
-//    def beforeUpdate() {
-//        calculateOverallScore()
-//    }
-//
-////    private void calculateOverallScore() {
-////        def scores = [technicalSkills, communicationSkills, teamwork, initiative,
-////                      punctuality, problemSolving, adaptability]
-////        this.overallScore = (scores.sum() / scores.size()) * 10
-////    }
-//    private void calculateOverallScore() {
-//        def scores = [technicalSkills, communicationSkills, teamwork, initiative,
-//                      punctuality, problemSolving, adaptability]
-//
-//        if (scores.any { it == null }) {
-//            return
-//        }
-//
-//        this.overallScore = ((scores.sum() as Double) / scores.size()) * 10
-//    }
-//
-//    String toString() {
-//        return "Evaluation - ${evaluationDate.format('dd/MM/yyyy')} - Score: ${overallScore}"
-//    }
-//
-//    Map getScores() {
-//        return [
-//                technicalSkills: technicalSkills,
-//                communicationSkills: communicationSkills,
-//                teamwork: teamwork,
-//                initiative: initiative,
-//                punctuality: punctuality,
-//                problemSolving: problemSolving,
-//                adaptability: adaptability
-//        ]
-//    }
-//}
-// File: grails-app/domain/interntrack/Evaluation.groovy
 package interntrack
 
 class Evaluation {
 
-    Date evaluationDate = new Date()
-    Integer technicalSkills = 5 // 1-10
-    Integer communicationSkills = 5 // 1-10
-    Integer teamwork = 5 // 1-10
-    Integer initiative = 5 // 1-10
-    Integer punctuality = 5 // 1-10
-    Integer problemSolving = 5 // 1-10
-    Integer adaptability = 5 // 1-10
-    String strengths
-    String areasForImprovement
-    String overallComments
-    Integer overallScore
-    String evaluatorName
-    String recommendations
-
     // Relationships
     static belongsTo = [intern: Intern]
+    static hasMany = [attachments: Attachment]
+
+    // Basic Info
+    String evaluatorName
+    Date evaluationDate
+
+    // Evaluation Period
+    Date periodStart
+    Date periodEnd
+
+    // Performance Criteria (ratings from 1-5)
+    Integer technicalSkills
+    Integer communicationSkills
+    Integer problemSolving
+    Integer initiative
+    Integer teamwork
+
+    // Comments
+    String strengths
+    String improvements
+    String generalComments
+
+    // Final Recommendation
+    String overallRating  // EXCELLENT, VERY_GOOD, GOOD, SATISFACTORY, NEEDS_IMPROVEMENT
+    String recommendation // HIRE, EXTEND, CONDITIONAL, NOT_RECOMMEND
+
+    // للتأكد من توافق قاعدة البيانات
+    Integer overallScore  // هذا الحقل مطلوب لقاعدة البيانات القديمة
+
+    Date dateCreated
+    Date lastUpdated
 
     static constraints = {
+        intern nullable: false
+
+        evaluatorName nullable: false, maxSize: 100
         evaluationDate nullable: false
-        technicalSkills range: 1..10
-        communicationSkills range: 1..10
-        teamwork range: 1..10
-        initiative range: 1..10
-        punctuality range: 1..10
-        problemSolving range: 1..10
-        adaptability range: 1..10
+
+        periodStart nullable: false
+        periodEnd nullable: false
+
+        technicalSkills nullable: false, range: 1..5
+        communicationSkills nullable: false, range: 1..5
+        problemSolving nullable: false, range: 1..5
+        initiative nullable: false, range: 1..5
+        teamwork nullable: false, range: 1..5
+
         strengths nullable: true, maxSize: 2000
-        areasForImprovement nullable: true, maxSize: 2000
-        overallComments nullable: true, maxSize: 3000
-        overallScore range: 10..100
-        evaluatorName blank: false
-        recommendations nullable: true, maxSize: 2000
-        // ✅ لا يوجد dateCreated/lastUpdated
+        improvements nullable: true, maxSize: 2000
+        generalComments nullable: true, maxSize: 5000
+
+        overallRating nullable: false, inList: ['EXCELLENT', 'VERY_GOOD', 'GOOD', 'SATISFACTORY', 'NEEDS_IMPROVEMENT']
+        recommendation nullable: false, inList: ['HIRE', 'EXTEND', 'CONDITIONAL', 'NOT_RECOMMEND']
+
+        overallScore nullable: true  // يمكن أن يكون null لأننا سنحسبه
+    }
+
+    static mapping = {
+        table 'evaluation'
+        sort evaluationDate: 'desc'
+        strengths type: 'text'
+        improvements type: 'text'
+        generalComments type: 'text'
+
+        // تعيين أسماء الأعمدة في قاعدة البيانات
+        overallRating column: 'overall_rating'
+        recommendation column: 'recommendation'
+        overallScore column: 'overall_score'
     }
 
     def beforeInsert() {
@@ -129,29 +83,57 @@ class Evaluation {
     }
 
     private void calculateOverallScore() {
-        def scores = [technicalSkills, communicationSkills, teamwork, initiative,
-                      punctuality, problemSolving, adaptability]
-
-        if (scores.any { it == null }) {
-            return
-        }
-
-        this.overallScore = ((scores.sum() as Double) / scores.size()) * 10
+        // حساب النتيجة الإجمالية من 0-100
+        def weightedScore = (technicalSkills * 0.3) +
+                (communicationSkills * 0.2) +
+                (problemSolving * 0.2) +
+                (initiative * 0.15) +
+                (teamwork * 0.15)
+        this.overallScore = (weightedScore * 20).round(0)
     }
 
     String toString() {
-        return "Evaluation - ${evaluationDate.format('dd/MM/yyyy')} - Score: ${overallScore}"
+        return "Evaluation for ${intern?.user?.fullName} on ${evaluationDate?.format('dd/MM/yyyy')}"
     }
 
-    Map getScores() {
-        return [
-                technicalSkills: technicalSkills,
-                communicationSkills: communicationSkills,
-                teamwork: teamwork,
-                initiative: initiative,
-                punctuality: punctuality,
-                problemSolving: problemSolving,
-                adaptability: adaptability
-        ]
+    Double getAverageScore() {
+        def total = technicalSkills + communicationSkills + problemSolving + initiative + teamwork
+        return (total / 5).round(1)
+    }
+
+    Double getWeightedScore() {
+        def score = (technicalSkills * 0.3) +
+                (communicationSkills * 0.2) +
+                (problemSolving * 0.2) +
+                (initiative * 0.15) +
+                (teamwork * 0.15)
+        return score.round(1)
+    }
+
+    String getRatingClass() {
+        switch(overallRating) {
+            case 'EXCELLENT': return 'success'
+            case 'VERY_GOOD': return 'info'
+            case 'GOOD': return 'warning'
+            case 'SATISFACTORY': return 'primary'
+            default: return 'danger'
+        }
+    }
+
+    String getRecommendationClass() {
+        switch(recommendation) {
+            case 'HIRE': return 'success'
+            case 'EXTEND': return 'info'
+            case 'CONDITIONAL': return 'warning'
+            default: return 'danger'
+        }
+    }
+
+    String getAreasForImprovement() {
+        return improvements
+    }
+
+    String getOverallComments() {
+        return generalComments
     }
 }

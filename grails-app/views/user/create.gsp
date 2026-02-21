@@ -5,16 +5,16 @@
   Time: 10:17 AM
 --%>
 
-%{--<%@ page contentType="text/html;charset=UTF-8" %>--}%
-%{--<html>--}%
-%{--<head>--}%
-%{--    <title></title>--}%
-%{--</head>--}%
+<%@ page contentType="text/html;charset=UTF-8" %>
+<html>
+<head>
+    <title></title>
+</head>
 
-%{--<body>--}%
+<body>
 
-%{--</body>--}%
-%{--</html>--}%
+</body>
+</html>
 <!-- File: grails-app/views/user/create.gsp -->
 <!DOCTYPE html>
 <html>

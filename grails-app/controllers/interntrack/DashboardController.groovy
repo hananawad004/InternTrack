@@ -873,6 +873,66 @@ class DashboardController {
     }
 
     @Secured('ROLE_SUPERVISOR')
+//    def supervisor() {
+//        println "=== Supervisor Dashboard ==="
+//
+//        try {
+//            def user = springSecurityService.currentUser
+//            def supervisor = user ? Supervisor.findByUser(user) : null
+//
+//            if (supervisor) {
+//                def interns = Intern.findAllBySupervisor(supervisor) ?: []
+//
+//                render(view: '/dashboard/supervisor', model: [
+//                        supervisor: supervisor,
+//                        currentInternCount: interns.size(),
+//                        maxInterns: supervisor.maxInterns ?: 5,
+//                        pendingReports: interns ? WeeklyReport.findAllByInternInListAndStatus(interns, 'SUBMITTED') : [],
+//                        tasks: getSupervisorTasks(supervisor),
+//                        interns: interns,
+//                        internStats: interns.collect { intern -> [
+//                                intern: intern,
+//                                taskStats: getTaskStatistics(intern),
+//                                reportStats: getReportStatistics(intern)
+//                        ]}
+//                ])
+//            } else {
+//                // ✅ هنا المشكلة كانت - استخدم user مش username
+//                render(view: '/dashboard/supervisor', model: [
+//                        supervisor: [
+//                                user: [
+//                                        fullName: user?.fullName ?: 'Supervisor',
+//                                        initials: user?.fullName?.substring(0, 1)?.toUpperCase() ?: 'SU'
+//                                ],
+//                                position: 'Supervisor',
+//                                department: '',
+//                                employeeId: '',
+//                                officeLocation: null,
+//                                phoneExtension: null,
+//                                maxInterns: 5
+//                        ],
+//                        currentInternCount: 0,
+//                        maxInterns: 5,
+//                        pendingReports: [],
+//                        tasks: [],
+//                        interns: [],
+//                        internStats: []
+//                ])
+//            }
+//        } catch (Exception e) {
+//            println "Error in supervisor dashboard: ${e.message}"
+//            render(view: '/dashboard/supervisor', model: [
+//                    supervisor: [user: [fullName: 'Supervisor', initials: 'SU']],
+//                    currentInternCount: 0,
+//                    maxInterns: 5,
+//                    pendingReports: [],
+//                    tasks: [],
+//                    interns: [],
+//                    internStats: []
+//            ])
+//        }
+//    }
+//    @Secured('ROLE_SUPERVISOR')
     def supervisor() {
         println "=== Supervisor Dashboard ==="
 
@@ -932,60 +992,134 @@ class DashboardController {
             ])
         }
     }
-
+//    @Secured('ROLE_INTERN')
+//    def intern() {
+//        println "=== Intern Dashboard ==="
+//
+//        try {
+//            def user = springSecurityService.currentUser
+//            def intern = user ? Intern.findByUser(user) : null
+//
+//            if (intern) {
+//                def endDate = intern.endDate ?: (new Date() + 60)
+//                def remainingDays = endDate ? (endDate - new Date()).intValue() : 60
+//
+//                render(view: '/dashboard/intern', model: [
+//                        intern: intern,
+//                        remainingDays: remainingDays,
+//                        taskStats: getTaskStatistics(intern),
+//                        reportStats: getReportStatistics(intern),
+//                        evalStats: getEvaluationStatistics(intern),
+//                        upcomingTasks: Task.findAllByInternAndStatusInList(intern, ['PENDING', 'IN_PROGRESS'],
+//                                [max: 5, sort: 'dueDate', order: 'asc']) ?: [],
+//                        recentReports: WeeklyReport.findAllByIntern(intern,
+//                                [max: 5, sort: 'reportDate', order: 'desc']) ?: []
+//                ])
+//            } else {
+//                def endDate = new Date() + 60
+//                render(view: '/dashboard/intern', model: [
+//                        intern: [
+//                                user: [
+//                                        fullName: user?.fullName ?: 'Intern',
+//                                        initials: user?.fullName?.substring(0, 1)?.toUpperCase() ?: 'IN'
+//                                ],
+//                                university: 'Not Assigned',
+//                                major: 'Not Assigned',
+//                                studentId: 'N/A',
+//                                supervisor: [user: [fullName: 'Not Assigned']],
+//                                startDate: new Date(),
+//                                endDate: endDate,
+//                                status: 'ACTIVE'
+//                        ],
+//                        remainingDays: 60,
+//                        taskStats: [total: 0, completed: 0, pending: 0, inProgress: 0, overdue: 0, completionRate: 0],
+//                        reportStats: [total: 0, approved: 0, submitted: 0, underReview: 0, totalHours: 0, avgHours: 0],
+//                        evalStats: [totalEvaluations: 0, averageScore: 0],
+//                        upcomingTasks: [],
+//                        recentReports: []
+//                ])
+//            }
+//        } catch (Exception e) {
+//            println "Error in intern dashboard: ${e.message}"
+//            render(view: '/dashboard/intern', model: [error: "Error loading dashboard"])
+//        }
+//    }
     @Secured('ROLE_INTERN')
     def intern() {
         println "=== Intern Dashboard ==="
 
         try {
             def user = springSecurityService.currentUser
-            def intern = user ? Intern.findByUser(user) : null
-
-            if (intern) {
-                def endDate = intern.endDate ?: (new Date() + 60)
-                def remainingDays = endDate ? (endDate - new Date()).intValue() : 60
-
-                render(view: '/dashboard/intern', model: [
-                        intern: intern,
-                        remainingDays: remainingDays,
-                        taskStats: getTaskStatistics(intern),
-                        reportStats: getReportStatistics(intern),
-                        evalStats: getEvaluationStatistics(intern),
-                        upcomingTasks: Task.findAllByInternAndStatusInList(intern, ['PENDING', 'IN_PROGRESS'],
-                                [max: 5, sort: 'dueDate', order: 'asc']) ?: [],
-                        recentReports: WeeklyReport.findAllByIntern(intern,
-                                [max: 5, sort: 'reportDate', order: 'desc']) ?: []
-                ])
-            } else {
-                def endDate = new Date() + 60
-                render(view: '/dashboard/intern', model: [
-                        intern: [
-                                user: [
-                                        fullName: user?.fullName ?: 'Intern',
-                                        initials: user?.fullName?.substring(0, 1)?.toUpperCase() ?: 'IN'
-                                ],
-                                university: 'Not Assigned',
-                                major: 'Not Assigned',
-                                studentId: 'N/A',
-                                supervisor: [user: [fullName: 'Not Assigned']],
-                                startDate: new Date(),
-                                endDate: endDate,
-                                status: 'ACTIVE'
-                        ],
-                        remainingDays: 60,
-                        taskStats: [total: 0, completed: 0, pending: 0, inProgress: 0, overdue: 0, completionRate: 0],
-                        reportStats: [total: 0, approved: 0, submitted: 0, underReview: 0, totalHours: 0, avgHours: 0],
-                        evalStats: [totalEvaluations: 0, averageScore: 0],
-                        upcomingTasks: [],
-                        recentReports: []
-                ])
+            if (!user) {
+                println "No user found!"
+                render(view: '/dashboard/intern', model: [error: "User not found"])
+                return
             }
+
+            println "User found: ${user.fullName} (${user.username})"
+
+            def intern = Intern.findByUser(user)
+
+            if (!intern) {
+                println "No intern profile found for user ${user.fullName}"
+                println "Available interns in database:"
+                Intern.list().each { i ->
+                    println "  - ${i.user?.fullName} (ID: ${i.id})"
+                }
+
+                // عرض صفحة الخطأ
+                render(view: '/dashboard/intern', model: [
+                        error: "Intern profile not found. Please contact administrator.",
+                        user: user
+                ])
+                return
+            }
+
+            println "Intern found: ${intern.user?.fullName}"
+            println "  - Student ID: ${intern.studentId}"
+            println "  - University: ${intern.university}"
+            println "  - Major: ${intern.major}"
+            println "  - Supervisor: ${intern.supervisor?.user?.fullName}"
+            println "  - Start Date: ${intern.startDate}"
+            println "  - End Date: ${intern.endDate}"
+            println "  - Status: ${intern.status}"
+
+            def remainingDays = intern.remainingDays
+            println "Remaining days: ${remainingDays}"
+
+            def taskStats = getTaskStatistics(intern)
+            def reportStats = getReportStatistics(intern)
+            def evalStats = getEvaluationStatistics(intern)
+
+            def upcomingTasks = Task.findAllByInternAndStatusInList(intern,
+                    ['PENDING', 'IN_PROGRESS'],
+                    [max: 5, sort: 'dueDate', order: 'asc']
+            ) ?: []
+
+            def recentReports = WeeklyReport.findAllByIntern(intern,
+                    [max: 5, sort: 'reportDate', order: 'desc']
+            ) ?: []
+
+            println "Task stats: ${taskStats}"
+            println "Upcoming tasks count: ${upcomingTasks.size()}"
+            println "Recent reports count: ${recentReports.size()}"
+
+            render(view: '/dashboard/intern', model: [
+                    intern: intern,
+                    remainingDays: remainingDays,
+                    taskStats: taskStats,
+                    reportStats: reportStats,
+                    evalStats: evalStats,
+                    upcomingTasks: upcomingTasks,
+                    recentReports: recentReports
+            ])
+
         } catch (Exception e) {
             println "Error in intern dashboard: ${e.message}"
-            render(view: '/dashboard/intern', model: [error: "Error loading dashboard"])
+            e.printStackTrace()
+            render(view: '/dashboard/intern', model: [error: "Error loading dashboard: ${e.message}"])
         }
     }
-
     // ========== HELPER METHODS ==========
 
     private List getSupervisorTasks(Supervisor supervisor) {
@@ -1045,5 +1179,38 @@ class DashboardController {
         } catch (Exception e) {
             return [totalEvaluations: 0, averageScore: 0]
         }
+    }
+    def debug() {
+        println "=== DEBUG DASHBOARD ==="
+
+        println "\n=== Users in Database ==="
+        User.list().each { u ->
+            println "ID: ${u.id}, Username: ${u.username}, FullName: ${u.fullName}"
+            def roles = UserRole.findAllByUser(u)*.role*.authority
+            println "  Roles: ${roles}"
+        }
+
+        println "\n=== Supervisors in Database ==="
+        Supervisor.list().each { s ->
+            println "ID: ${s.id}, User ID: ${s.user?.id}, Name: ${s.user?.fullName}, Employee ID: ${s.employeeId}"
+        }
+
+        println "\n=== Interns in Database ==="
+        Intern.list().each { i ->
+            println "ID: ${i.id}, User ID: ${i.user?.id}, Name: ${i.user?.fullName}, Student ID: ${i.studentId}"
+        }
+
+        println "\n=== Roles in Database ==="
+        Role.list().each { r ->
+            println "ID: ${r.id}, Authority: ${r.authority}"
+        }
+
+        println "\n=== WeeklyReports in Database ==="
+        println "Count: ${WeeklyReport.count()}"
+
+        println "\n=== Tasks in Database ==="
+        println "Count: ${Task.count()}"
+
+        render "Check console for debug info"
     }
 }
